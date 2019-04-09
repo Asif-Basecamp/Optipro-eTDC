@@ -1,0 +1,163 @@
+<div class="opti_dashboard position-relative">   
+  <div class="container-fluid">
+    <div class="row">
+
+        <!-- loader start -->
+        <div class="opti_loader opti_loader-module-grid-list" *ngIf="showLoader">
+            <div class="opti_spinner"></div>
+        </div>
+        <!-- loader end -->  
+
+        <!-- content start -->
+        <ng-container *ngIf="showLoader==false">
+
+          <div class="d-flex w-100">           
+            <kendo-combobox [data]="listItems" [value]="'Basketball'">
+            </kendo-combobox>
+            <button kendoButton class="ml-2">Show</button>
+          </div> 
+
+          <div class="d-flex w-100 mt-2 f-s-14">           
+            <div class="text-primary">Product Code: </div>
+            <div class="ml-2"> Serial-UoM</div>
+          </div>  
+
+          <div class="w-100 mt-4">  
+            <div #optiRightAddInquiry class="opti_dashboard-table-detail w-100">
+                <!-- tab start heading start -->
+                <div class="position-relative opti_tab-outer w-100">
+                  <ul #optiTab class="opti_tab position-relative tabs clearfix" id="opti_TabID">
+                      <li class="opti_tablinks active" (click)="openTab($event, 'attribute')">
+                        <a href="javascript:void('0');">Attribute</a>
+                      </li>
+                      <li class="opti_tablinks" (click)="openTab($event, 'variable')">
+                        <a href="javascript:void('0');">Variable</a>
+                      </li>
+                  </ul>
+                </div>
+                <!-- tab start heading end -->
+                <!-- tab content start -->
+                <div id="" *ngIf="tabName=='attribute'" class="opti_tabcontent" >
+                  <div class="row">
+                    <div class="col-12">
+                        <h4 class="mb-3">Capture Attribute Values</h4>
+                    </div>
+                    
+                    <div class="w-100 position-relative" *ngIf="showGridLoader" style="min-height:150px">
+                      <!-- loader start -->
+                      <div class="opti_loader opti_loader-content-tab" >
+                          <div class="opti_spinner"></div>
+                      </div>
+                      <!-- loader end -->  
+                    </div>
+
+                    <div class="col-12">                      
+                      <div class="w-100" [perfectScrollbar]=" ">
+                        <!-- grid start -->
+                        <ng-container *ngIf="showGridLoader==false">
+                            <kendo-grid 
+                            [kendoGridBinding]="gridData" 
+                            [resizable]="false" 
+                            [pageSize]="50" 
+                            [pageable]="true" 
+                            [sortable]="true"  
+                            [filterable]=isColumnFilter
+                            [groupable]=isColumnGroup 
+                            [columnMenu]="{ columnChooser: false }" 
+                            [height]=400 
+                            [selectable]="true" 
+                            #gridItem>
+                            <!-- [kendoGridBinding]="gridData | customPipeItem:searchRequest"  -->
+                            <!-- (selectionChange)="openInqueryDetailOnSelectInquery(gridItem, $event, true, gridItem)" -->
+              
+                            <!-- grid template start -->
+                            <ng-template kendoGridToolbarTemplate>
+              
+                                <!-- show hide column start show hide -->
+                                <kendo-grid-column-chooser class="float-left"></kendo-grid-column-chooser>
+              
+                                <!-- filter and grouping -->
+                                <form class="k-form opti_show-hide-grid-column-filter float-left">
+                                    <div class="k-form-field float-left">
+                                        <input #chkFilter type="checkbox" (change)="onFilterChange(chkFilter,gridItem)" id="opti_SalesOrderContentColumnFilterID" [(ngModel)]="isColumnFilter" class="k-checkbox" name="columnfilter" />
+                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnFilterID">Enable Filter</label>
+                                    </div>
+              
+                                    <div class="k-form-field float-left">
+                                        <input type="checkbox" id="opti_SalesOrderContentColumnGroupID"  [(ngModel)]="isColumnGroup" class="k-checkbox" name="columnGroup" />
+                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnGroupID">Enable Grouping</label>
+                                    </div>
+                                </form>
+              
+                                <!-- export -->
+                                <button type="button" kendoGridExcelCommand icon="file-excel" class="float-left opti_grid-toolbar-excelbutton">
+                                    <svg-icon src="{{imgPath}}/common/download.svg" [svgStyle]="{ 'width.px':16, 'height.px':16}"></svg-icon>
+                                </button>
+              
+                                <!-- common search -->
+                                <!-- <div class="float-right opti_right-top-sec-grid-purchase opti_right-top-sec-grid">
+                                    <form class="k-form opti_common-search-form float-left p-0">
+                                        <label class="k-form-field opti_common-search-label">
+                                            <input type="text" class="k-textbox" name="searchRequest" [(ngModel)]="searchRequest" />
+                                            <span class="opti_vertical-align opti_mouse-pointer"><img src="{{imgPath}}/common/search-black.svg" class="" alt="Search" width="15" /></span>
+                                        </label>
+                                    </form>
+                                </div> -->
+              
+                            </ng-template>
+              
+                            <kendo-grid-column field="ItemNumber" title="Item Number" [width]="160"></kendo-grid-column>
+                            <kendo-grid-column field="Quantity" title="Quantity" [width]="160"></kendo-grid-column>
+                            <kendo-grid-column field="UnitPrice" [width]="160" title="Unit Price"></kendo-grid-column>
+                            <kendo-grid-column field="DiscountPecent" [width]="160" title="Disc%" ></kendo-grid-column>
+                            <kendo-grid-column field="TaxCode" title="Tax Code" [width]="160"></kendo-grid-column>
+                            <kendo-grid-column field="TotalLC" title="Total (LC)" [width]="160"></kendo-grid-column>
+                            <kendo-grid-column field="UOMCode" title="UoM Code" [width]="160"></kendo-grid-column>
+                            <kendo-grid-column field="ShipTo" title="Ship To" [width]="160"></kendo-grid-column>
+                            <kendo-grid-column field="BillTo" [width]="160" title="Bill To"></kendo-grid-column>
+                            <kendo-grid-column field="ShippingType" [width]= "160" title="Shipping Type"></kendo-grid-column>
+                            <kendo-grid-column field="DeliveryDate" title="Delivery Date" [width]="160" filter="date"  type=date format="{0:dd MMM yy}"></kendo-grid-column>
+                            
+                            <!-- xlsx template start -->
+                            <kendo-grid-excel fileName="sales-order-content.xlsx"></kendo-grid-excel>
+                            <!-- xlsx template end -->
+              
+                          </kendo-grid>
+                        </ng-container>
+                        <!-- grid end -->
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+            
+                <div id="" *ngIf="tabName=='variable'" class="opti_tabcontent">
+                  <h4>Capture Variable Values</h4>
+                </div>
+                <!-- tab content end -->
+            </div>  
+          </div>
+
+        </ng-container>
+        <!-- content end -->
+
+        <div class="row mt-4 mb-5">  
+          <div class="col-12">
+            <button kendoButton class="mr-1">Sample Info (1)</button>
+            <button kendoButton class="btn btn-success">Save</button>
+            <button kendoButton class="k-button k-primary">Compute Result </button>
+            <button kendoButton >Export</button>
+          </div>
+          <div class="col-12 my-3">
+            <input type="file">
+          </div>
+          <div class="col-12">
+            <button kendoButton class="mr-1">Collapse All</button>
+            <button kendoButton>Expand All</button>
+          </div>
+        </div>
+
+    </div>  
+  </div>  
+</div>
+
