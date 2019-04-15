@@ -68,7 +68,9 @@
     .opti_menusidebar-mobile-open{
         app-portal-left {
             width: 100%;
-            height: calc(100% - 65px);
+            //height: calc(100% - 65px);
+            height:100%;
+            min-height: 100vh;
             z-index: 999;
             display: block;
             .opti_menusidebar-mobile-open{
