@@ -3,7 +3,6 @@ import { UIHelper } from '../../helpers/ui.helpers';
 import { Commonservice } from '../../services/commonservice.service';
 import { Router } from '@angular/router';
 import { opticonstants } from '../../constants';
-
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 
@@ -19,14 +18,13 @@ export class PortalTopComponent implements OnInit {
   constructor(private modalService: NgbModal, private router: Router, private commonService: Commonservice) { }
   
   selectedThemeColor: string = opticonstants.DEFAULTTHEMECOLOR;
-  
-  loggedInUserName: string = 'Prashant';
-  parentName: string = 'Bizchat';
-  applicationVersion:string = '1.0';
 
+  cmpName:string;
+ 
   ngOnInit() {
     
     UIHelper.manageThemeCssFile();
+    this.cmpName = window.localStorage.getItem("companyName");
     
   }
 
@@ -48,7 +46,8 @@ export class PortalTopComponent implements OnInit {
   }
 
   signOut() {
-
+    window.localStorage.clear();
+    this.router.navigateByUrl('account');
   }
 
 

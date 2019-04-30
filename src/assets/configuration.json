@@ -1,0 +1,8 @@
+[
+    {
+        "optiProETDCAPIURL": "http://localhost:57913/api",
+        "deployedFor": "handheld",
+        "version":"",
+        "language": "en"
+    }
+]
