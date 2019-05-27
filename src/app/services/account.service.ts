@@ -24,7 +24,7 @@ export class AccountService {
 
     login(username:string,password:string,adminUrl:string):Observable<any>{
       let jObject:any={ Login: JSON.stringify([{ User: username, Password: password, IsAdmin: false }]) };
-      return this._httpsClient.post(adminUrl+"/api/login/ValidateUserLogin",jObject,this.httpOptions);
+      return this._httpsClient.post(adminUrl+"api/login/ValidateUserLogin",jObject,this.httpOptions);
      
     }
 

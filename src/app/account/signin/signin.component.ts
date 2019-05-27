@@ -20,7 +20,7 @@ export class SigninComponent implements OnInit {
   invalidCredentialMsg: string = "";
   isUserEmpty:boolean;
   isPwdEmpty:boolean;
-  adminURL: string;
+  adminURL: string = "";
   public selectedValue:any;
 
   // Cookie
@@ -30,6 +30,9 @@ export class SigninComponent implements OnInit {
   private baseObj = new Base();
   currentPath: string;
   configData: any[];
+  public arrCaptions: any[];
+  public language: string;
+  public load:boolean = false;
 
 
   constructor(private router: Router, private _accountService:AccountService, private _httpsClient:HttpClient) { }
@@ -52,10 +55,20 @@ export class SigninComponent implements OnInit {
     this._httpsClient.get(this.currentPath + '/assets/configuration.json').subscribe(
       data =>{
         this.configData = data as string[];
+        this.language = this.configData[0].language;
+        this._httpsClient.get(this.currentPath + '/assets/i18n/'+this.language+'.json').subscribe(
+          data=>{
+                this.arrCaptions = data as string[];
+                this.load = true;
+                window.localStorage.setItem('captions',JSON.stringify(this.arrCaptions));
+          } 
+       );
         window.localStorage.setItem('currentURL',JSON.stringify(this.configData[0].optiProETDCAPIURL));
         this.getAdminUrl();
+        
       }
     );
+
     
     // Apply classes on Body
     const element = document.getElementsByTagName("body")[0];
@@ -102,7 +115,7 @@ public getCookie(cname) {
    * Function to get admin url
    */
   public getAdminUrl(){
-    this.showLoader = false;
+    this.showLoader = true;
     this._accountService.getAdminUrl(this.configData[0].optiProETDCAPIURL).subscribe(
         data => {
           this.adminURL = data;
@@ -112,13 +125,14 @@ public getCookie(cname) {
   }
 
 public onPasswordBlur(username:string,password:string){
+  if(this.adminURL != ""){
    this.showLoader = true;
    this.listItems = null;
    this.selectedValue = null;
       this._accountService.login(username,password,this.adminURL).subscribe(
         data => {
           if(data!= null && data.Table.length > 0 ){
-              this.listItems = data.Table.filter(a=>a.OPTM_OPTIADDON=="QCDC");
+              this.listItems = data.Table.filter(a=>a.OPTM_OPTIADDON=="MMO");
               this.selectedValue = this.listItems[0];
               this.isError = false;
               this.showLoader = false;
@@ -131,6 +145,7 @@ public onPasswordBlur(username:string,password:string){
         }
       )
   }
+}
 
  
 public async login(username:string,password:string,companyName:any) {

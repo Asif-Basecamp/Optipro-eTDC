@@ -26,4 +26,16 @@ export class QcdataService {
         let jObject:any = { ETDC: JSON.stringify([{CompanyDBId:companyName,QCDocNo:docNo}])};
         return this.httpClient.post(currentUrl+"/QCOrder/GetQCRecord",jObject,this.httpOptions);
       }
+
+      SaveResult(currentUrl:string,ag:any,vg:any,companyName:string,userName:string){
+      //let jObject:any = {ETDC: JSON.stringify([{Attribute:gridData,CompanyDBId:companyName,UserName:userName}])};
+      let jObject:any = {Attribute:JSON.stringify([{ag}]),Variable:JSON.stringify([{vg}]),User: JSON.stringify([{CompanyDBId:companyName,UserName:userName}])}
+        return this.httpClient.post(currentUrl+"/QCOrder/SaveResult",jObject,this.httpOptions);
+      }
+     
+      ComputeResult(currentUrl:string,ag:any,vg:any,companyName:string,userName:string){
+        //let jObject:any = {ETDC: JSON.stringify([{Attribute:gridData,CompanyDBId:companyName,UserName:userName}])};
+        let jObject:any = {Attribute:JSON.stringify([{ag}]),Variable:JSON.stringify([{vg}]),User: JSON.stringify([{CompanyDBId:companyName,UserName:userName}])}
+          return this.httpClient.post(currentUrl+"/QCOrder/ComputeResult",jObject,this.httpOptions);
+        }
 }

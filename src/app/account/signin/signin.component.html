@@ -1,4 +1,4 @@
-<div id="opti_signinID" class="opti_account-submodule-wrapper">
+<div *ngIf="this.load==true" id="opti_signinID" class="opti_account-submodule-wrapper">
 
   <div class="float-left opti_account-banner-section">
   </div>
@@ -17,36 +17,36 @@
             <div class="w-100 text-center opti_signin-logo">
                 <!-- <img src="assets/images/logo/large-logo.png" alt="brandlogo" class="opti_account-logo"> -->
                 <h3>
-                    eTDC Login
+                    {{arrCaptions.signin}}
                 </h3>
             </div>    
             
             <form class="k-form" #signInForm="ngForm">
                 <label class="k-form-field">
-                    <span class="opti_form-label">Username * 
+                    <span class="opti_form-label"> {{arrCaptions.username}}
                     <!-- <span *ngIf="emailId.errors?.email && emailId.touched" class="float-right opti_error-msg"> Invalid emailId. </span> -->
-                    <span *ngIf="this.isUserEmpty == true || emailId.errors?.required && (emailId.dirty || emailId.touched)" class="float-right opti_error-msg" >Username is required.</span>
+                    <span *ngIf="this.isUserEmpty == true || emailId.errors?.required && (emailId.dirty || emailId.touched)" class="float-right opti_error-msg" >{{arrCaptions.username_req}}</span>
                     <!-- <span  *ngIf="this.userNotExist==true && (emailId.dirty || emailId.touched) && (pwd.dirty || pwd.touched) && !emailId.errors?.required && !emailId.errors?.valid " class="float-right opti_error-msg">Invalid Credentials</span> -->
                     </span>
                     <input type="text" id="email" name="email" required [(ngModel)]="userName"  #emailId = ngModel class="k-textbox" value="" placeholder="e.g. username"/>
                 </label>
                 
                 <label class="k-form-field">
-                    <span class="opti_form-label">Password *
-                        <span  *ngIf="this.isPwdEmpty == true || pwd.errors && (pwd.dirty || pwd.touched)"   class="float-right opti_error-msg">Password is required.</span>
-                        <span  *ngIf="this.isError == true &&  (pwd.dirty || pwd.touched) && (emailId.dirty || emailId.touched) && !pwd.errors?.required" class="float-right opti_error-msg">Invalid credentials.</span>
+                    <span class="opti_form-label">{{arrCaptions.password}}
+                        <span  *ngIf="this.isPwdEmpty == true || pwd.errors && (pwd.dirty || pwd.touched)"   class="float-right opti_error-msg">{{arrCaptions.password_req}}</span>
+                        <span  *ngIf="this.isError == true &&  (pwd.dirty || pwd.touched) && (emailId.dirty || emailId.touched) && !pwd.errors?.required" class="float-right opti_error-msg">{{arrCaptions.invalidcredentials}}</span>
                         
                     </span>
                     <input id="password" name="password" required [(ngModel)]="password" #pwd = ngModel type="password" class="k-textbox" value="" placeholder="Your password"  (blur)="onPasswordBlur(emailId.value,pwd.value)"/>
                 </label>
 
                 <label class="k-form-field">
-                    <span class="opti_form-label">Select Company</span>
+                    <span class="opti_form-label">{{arrCaptions.company}}</span>
                     <kendo-dropdownlist class="form-control" #companyName [data]="listItems" textField="OPTM_COMPID" valueField="OPTM_COMPID" [(ngModel)]="selectedValue" [ngModelOptions]="{standalone: true}"></kendo-dropdownlist>
                 </label>
 
                 <div class="text-right my-4">
-                    <button type="submit" class="k-button k-primary w-100" (click)="login(emailId.value,pwd.value,companyName.value)" >Login</button>
+                    <button type="submit" class="k-button k-primary w-100" (click)="login(emailId.value,pwd.value,companyName.value)" >{{arrCaptions.login_btn}}</button>
                 </div> 
             </form>
             <!-- </div> -->

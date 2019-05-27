@@ -20,11 +20,14 @@ export class PortalTopComponent implements OnInit {
   selectedThemeColor: string = opticonstants.DEFAULTTHEMECOLOR;
 
   cmpName:string;
+
+  arrCaptions:any[];
  
   ngOnInit() {
     
     UIHelper.manageThemeCssFile();
     this.cmpName = window.localStorage.getItem("companyName");
+    this.arrCaptions = JSON.parse( window.localStorage.getItem("captions"));
     
   }
 

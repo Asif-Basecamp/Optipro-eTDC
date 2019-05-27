@@ -19,24 +19,24 @@
               [textField]="'U_O_QCTEST_DOCNO'"
               [valueField]="'U_O_QCTEST_DOCNO'">
               </kendo-combobox>
-            <button kendoButton class="ml-2" (click)="showClick(docNo.value)">Show data</button>
+            <button kendoButton class="ml-2" (click)="showClick(docNo.value)">{{arrCaptions.Showdata_btn}}</button>
           </div>    
 
-          <div class="d-flex w-100 mt-2 f-s-14">           
-            <div class="text-primary">Product Code: </div>
-            <div class="ml-2"> Serial-UoM</div>
+          <div class="d-flex w-100 mt-2 f-s-14" *ngIf="this.qcDocNo !=''">           
+            <div class="text-primary">{{arrCaptions.qc_Order}}</div>
+            <div class="ml-2">{{qcDocNo}}</div>
           </div>  
 
-          <div class="w-100 mt-4">  
+          <div class="w-100 mt-4" >  
             <div #optiRightAddInquiry class="opti_dashboard-table-detail w-100">
                 <!-- tab start heading start -->
                 <div class="position-relative opti_tab-outer w-100">
                   <ul #optiTab class="opti_tab position-relative tabs clearfix" id="opti_TabID">
                       <li class="opti_tablinks active" (click)="openTab($event, 'attribute')">
-                        <a href="javascript:void('0');">Attribute</a>
+                        <a href="javascript:void('0');">{{arrCaptions.grd_Attribute}}</a>
                       </li>
                       <li class="opti_tablinks" (click)="openTab($event, 'variable')">
-                        <a href="javascript:void('0');">Variable</a>
+                        <a href="javascript:void('0');">{{arrCaptions.grd_Variable}}</a>
                       </li>
                   </ul>
                 </div>
@@ -45,7 +45,7 @@
                 <div id="" *ngIf="tabName=='attribute'" class="opti_tabcontent" >
                   <div class="row">
                     <div class="col-12">
-                        <h4 class="mb-3">Capture Attribute Values</h4>
+                        <h4 class="mb-3">{{arrCaptions.cap_attribute}}</h4>
                     </div>
                     
                     <div class="w-100 position-relative" *ngIf="showGridLoader" style="min-height:150px">
@@ -61,13 +61,134 @@
                         <!-- grid start -->
                         <ng-container *ngIf="showGridLoader==false">
                             <kendo-grid 
-                            [kendoGridBinding]="gridData" 
+                            [kendoGridBinding]="attrGridData" 
                             [resizable]="false" 
                             [pageSize]="50" 
                             [pageable]="true" 
                             [sortable]="true"  
                             [filterable]=isColumnFilter
                             [reorderable]="true"
+                            [groupable]=isColumnGroup 
+                            [columnMenu]="{ columnChooser: false }" 
+                            [height]=400 
+                            [selectable]="true"
+                            #gridItem>
+                            <!-- [kendoGridBinding]="gridData | customPipeItem:searchRequest"  -->
+                            <!-- (selectionChange)="openInqueryDetailOnSelectInquery(gridItem, $event, true, gridItem)" -->
+              
+                            <!-- grid template start -->
+                            <ng-template kendoGridToolbarTemplate>
+              
+                                <!-- show hide column start show hide -->
+                                <kendo-grid-column-chooser class="float-left"></kendo-grid-column-chooser>
+              
+                                <!-- filter and grouping -->
+                                <form class="k-form opti_show-hide-grid-column-filter float-left">
+                                    <div class="k-form-field float-left">
+                                        <input #chkFilter type="checkbox" (change)="onFilterChange(chkFilter,gridItem)" id="opti_SalesOrderContentColumnFilterID" [(ngModel)]="isColumnFilter" class="k-checkbox" name="columnfilter" />
+                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnFilterID">{{arrCaptions.enb_filter}}</label>
+                                    </div>
+              
+                                    <div class="k-form-field float-left">
+                                        <input type="checkbox" id="opti_SalesOrderContentColumnGroupID"  [(ngModel)]="isColumnGroup" class="k-checkbox" name="columnGroup" />
+                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnGroupID">{{arrCaptions.enb_grouping}}</label>
+                                    </div>
+                                </form>
+              
+                                <!-- export -->
+                                <button type="button" kendoGridExcelCommand icon="file-excel" class="float-left opti_grid-toolbar-excelbutton">
+                                    <svg-icon src="{{imgPath}}/common/download.svg" [svgStyle]="{ 'width.px':16, 'height.px':16}"></svg-icon>
+                                </button>
+                            </ng-template>
+              
+                            <kendo-grid-column  field="U_O_TEST_RLSEQ"  title="{{arrCaptions.cap_title_Sequence}}" [width]="160" >
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_TEST_RLSEQ}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_LOTSER_NO" title="{{arrCaptions.cap_title_BatchSerial}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_LOTSER_NO}}</ng-template></kendo-grid-column>
+                            <kendo-grid-column field="SampleNo" [width]="160" title="{{arrCaptions.cap_title_sample}}" >
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.SampleNo}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_SUBPLAN_CODE" title="{{arrCaptions.cap_title_subplan}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_SUBPLAN_CODE}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_ATTR_NAME" title="{{arrCaptions.attr_title_attrName}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_ATTR_NAME}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="Value" title="{{arrCaptions.cap_title_Value}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                <select class="form-control  form-control-sm" #attrValue (change)="attrGridValChange(attrValue.value,dataItem)">
+                                  <option value=""></option>
+                                  <ng-container *ngFor="let val of attrListValue">
+                                  <option  *ngIf="val.U_O_TEST_RLSEQ === dataItem.U_O_TEST_RLSEQ" [value]="val.U_O_ATTRI_VAL"  [selected]="dataItem.U_O_ATTRI_MEAS_VAL === val.U_O_ATTRI_VAL">{{val.U_O_ATTRI_VAL}}</option>
+                                  </ng-container>
+                                </select>
+                              </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column *ngIf="this.isAllowable=='Y'"  [width]= "160" field="U_O_ATTRI_VAL" title="{{arrCaptions.cap_title_allowable}}"></kendo-grid-column>
+                            <kendo-grid-column field="Result" title="{{arrCaptions.cap_title_Result}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                <select class="form-control  form-control-sm" #attrResult (change)="dropDownChanged('Attr','U_O_QC_RESULT',dataItem,attrResult.value)">
+                                  <option value=""></option>
+                                  <option *ngFor="let val of ListResult" [value]="val.value" [selected]="dataItem.QCRESULT === val.value" > {{val.value}}</option>
+                                </select>
+                              </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="Tool" title="{{arrCaptions.cap_title_toolgauge}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                <select class="form-control  form-control-sm" #tgValue (change)="dropDownChanged('Attr','U_O_TG_ID_USED',dataItem,tgValue.value)">
+                                  <option value=""></option>
+                                  <option *ngFor="let val of ListToolGauge" [value]="val.Code" [selected]="dataItem.U_O_TG_CODE_USED === val.Code"> {{val.Code}}</option>
+                                </select>
+                              </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="Inspector" title="{{arrCaptions.cap_title_Inspector}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                <select class="form-control  form-control-sm"  #inspValue (change)="dropDownChanged('Attr','U_O_INSPECTOR_CODE',dataItem,inspValue.value)">
+                                    <option value=""></option>
+                                  <option *ngFor="let val of ListInspID" [value]="val.Name" [selected]="dataItem.U_O_INSPECTOR_CODE === val.Name"> {{val.Name}}</option>
+                                </select>
+                              </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="dataItem.U_O_REMARKS" title="{{arrCaptions.cap_title_Remarks}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                  <span  *ngIf="this.dataItem.isRemarkReqAttr == true"  class="float-right opti_error-msg">{{arrCaptions.remarkreq}}</span>
+                                <input type="text" class="k-textbox" #remarks id="remarks" name="remarks" title="" [value]="this.dataItem.U_O_REMARKS" (blur)="remarksFilled('Attr',dataItem,remarks.value)" />
+                              </ng-template>
+                            </kendo-grid-column>
+                           
+                           <!-- xlsx template start -->
+                            <kendo-grid-excel fileName="sales-order-content.xlsx"></kendo-grid-excel>
+                            <!-- xlsx template end -->
+                           </kendo-grid>
+                        </ng-container>
+                        <!-- grid end -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+             
+                <div id="" *ngIf="tabName=='variable'" class="opti_tabcontent pb-0">
+                  <h4>{{arrCaptions.cap_variable}}</h4>
+                  <div class="w-100 position-relative" *ngIf="showGridLoader" style="min-height:150px">
+                    <!-- loader start -->
+                    <div class="opti_loader opti_loader-content-tab" >
+                        <div class="opti_spinner"></div>
+                    </div>
+                    <!-- loader end -->  
+                  </div>
+
+                  <div class="col-12">                      
+                    <div class="w-100" [perfectScrollbar]=" ">
+                      <!-- grid start -->
+                      <ng-container *ngIf="showGridLoader==false">
+                          <kendo-grid 
+                            [kendoGridBinding]="variGridData" 
+                            [resizable]="false" 
+                            [pageSize]="50" 
+                            [pageable]="true" 
+                            [sortable]="true"  
+                            [filterable]=isColumnFilter
                             [groupable]=isColumnGroup 
                             [columnMenu]="{ columnChooser: false }" 
                             [height]=400 
@@ -86,12 +207,12 @@
                                 <form class="k-form opti_show-hide-grid-column-filter float-left">
                                     <div class="k-form-field float-left">
                                         <input #chkFilter type="checkbox" (change)="onFilterChange(chkFilter,gridItem)" id="opti_SalesOrderContentColumnFilterID" [(ngModel)]="isColumnFilter" class="k-checkbox" name="columnfilter" />
-                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnFilterID">Enable Filter</label>
+                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnFilterID">{{arrCaptions.enb_filter}}</label>
                                     </div>
               
                                     <div class="k-form-field float-left">
                                         <input type="checkbox" id="opti_SalesOrderContentColumnGroupID"  [(ngModel)]="isColumnGroup" class="k-checkbox" name="columnGroup" />
-                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnGroupID">Enable Grouping</label>
+                                        <label class="k-checkbox-label" for="opti_SalesOrderContentColumnGroupID">{{arrCaptions.enb_grouping}}</label>
                                     </div>
                                 </form>
               
@@ -99,132 +220,114 @@
                                 <button type="button" kendoGridExcelCommand icon="file-excel" class="float-left opti_grid-toolbar-excelbutton">
                                     <svg-icon src="{{imgPath}}/common/download.svg" [svgStyle]="{ 'width.px':16, 'height.px':16}"></svg-icon>
                                 </button>
-              
-                                <!-- common search -->
-                                <!-- <div class="float-right opti_right-top-sec-grid-purchase opti_right-top-sec-grid">
-                                    <form class="k-form opti_common-search-form float-left p-0">
-                                        <label class="k-form-field opti_common-search-label">
-                                            <input type="text" class="k-textbox" name="searchRequest" [(ngModel)]="searchRequest" />
-                                            <span class="opti_vertical-align opti_mouse-pointer"><img src="{{imgPath}}/common/search-black.svg" class="" alt="Search" width="15" /></span>
-                                        </label>
-                                    </form>
-                                </div> -->
-              
                             </ng-template>
               
-                            <kendo-grid-column field="ItemNumber" title="Seq No." [width]="160"></kendo-grid-column>
-                            <kendo-grid-column field="Quantity" title="Batch/Serial No." [width]="160"></kendo-grid-column>
-                            <kendo-grid-column field="UnitPrice" [width]="160" title="Attribute Value"></kendo-grid-column>
-                            <kendo-grid-column field="DiscountPecent" [width]="160" title="Sample No." ></kendo-grid-column>
-                            <kendo-grid-column field="TaxCode" title="Sub Plan" [width]="160"></kendo-grid-column>
-                            <kendo-grid-column field="TotalLC" title="Attribute Name" [width]="160"></kendo-grid-column>
-                            <kendo-grid-column field="UOMCode" title="Value" [width]="160"></kendo-grid-column>
-                            <kendo-grid-column field="ShipTo" title="QC Result" [width]="160">
-                              <ng-template kendoGridEditTemplate let-dataItem="dataItem">
-                                <kendo-dropdownlist  [data]="listVal"></kendo-dropdownlist>
-                            </ng-template>
+                            <kendo-grid-column field="U_O_VARI_VALUE_SEQ" title="{{arrCaptions.cap_title_Sequence}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_VARI_VALUE_SEQ}}</ng-template>
                             </kendo-grid-column>
-                            <kendo-grid-column field="BillTo" [width]="160" title="Tool Gauge"></kendo-grid-column>
-                            <kendo-grid-column field="ShippingType" [width]= "160" title="Inspector"></kendo-grid-column>
-                            <kendo-grid-column field="ShippingType" [width]= "160" title="Remarks"></kendo-grid-column>
+                            <kendo-grid-column field="U_O_LOTSER_NO" title="{{arrCaptions.cap_title_BatchSerial}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_LOTSER_NO}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="SampleNo" title="{{arrCaptions.cap_title_sample}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.SampleNo}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_VARIABLE_NAME" title="{{arrCaptions.var_title_varName}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_VARIABLE_NAME}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_SUBPLAN_CODE" title="{{arrCaptions.cap_title_subplan}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_SUBPLAN_CODE}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_VARI_MEA_VAL" title="{{arrCaptions.cap_title_Value}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                  <span  *ngIf="dataItem.isValueInvalidVari"  class="float-rightopti_error-msg">{{arrCaptions.var_error_valueInvalid}}</span>
+                                  <input type="number" 
+                                  #varMeasuredVal (blur)="variGridValChange(dataItem,varMeasuredVal.value)"  [value]="dataItem.U_O_VARI_MEA_VAL"/>
+                                </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column  *ngIf="((this.varInspTyp==false)&&(this.isAllowable=='Y'))"  field="U_O_VARI_TARGET_VAL" title="{{arrCaptions.var_title_targetValue}}" [width]="160">
+                                <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_VARI_TARGET_VAL}}</ng-template>
+                              </kendo-grid-column>
+                            <kendo-grid-column *ngIf="((this.varInspTyp==false)&&(this.isAllowable=='Y'))"   field="U_O_VARI_UPPER_VAL" title="{{arrCaptions.var_title_UpperValue}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_VARI_UPPER_VAL}}</ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column *ngIf="((this.varInspTyp==false)&&(this.isAllowable=='Y'))"   field="U_O_VARI_LOWER_VAL" title="{{arrCaptions.var_title_LowerValue}}" [width]="160">
+                                <ng-template kendoGridCellTemplate let-dataItem>{{dataItem.U_O_VARI_LOWER_VAL}}</ng-template>
+                            </kendo-grid-column>
                             
+                            <kendo-grid-column *ngIf="this.varInspTyp==true" field="U_O_GORESULT" title="{{arrCaptions.var_title_GoResult}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                <select class="form-control form-control-sm">
+                                    <option value=""></option>
+                                <option *ngFor="let val of varPassFail" [value]="val.value" [selected]="dataItem.U_O_GORESULT==val.value">
+                                  {{val.value}}
+                                </option>
+                                </select>
+                              </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column *ngIf="this.varInspTyp==true" field="U_O_NOGORESULT" title="{{arrCaptions.var_title_NoGoResult}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                <select class="form-control form-control-sm">
+                                    <option value=""></option>
+                                <option *ngFor="let val of varPassFail" [value]="val.value" [selected]="dataItem.U_O_NOGORESULT==val.value">
+                                  {{val.value}}
+                                </option>
+                                </select>
+                              </ng-template>
+                            </kendo-grid-column>
+                            
+                            <kendo-grid-column field="U_O_TG_ID_USED" title="{{arrCaptions.cap_title_toolgauge}}" [width]="160">
+                                <ng-template kendoGridCellTemplate let-dataItem>
+                                    <select #toolGuge class="form-control form-control-sm" (change)="dropDownChanged('Vari','U_O_TG_ID_USED',dataItem,toolGuge.value)">
+                                      <option value=""></option>
+                                    <option *ngFor="let val of ListToolGauge" [value]="val.Code" [selected]="dataItem.U_O_TG_ID_USED==val.Code">
+                                      {{val.Code}}
+                                    </option>
+                                    </select>
+                                  </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_INSPECTOR_ID" title="{{arrCaptions.cap_title_Inspector}}" [width]="160">
+                                <ng-template kendoGridCellTemplate let-dataItem>
+                                    <select #inspectorId class="form-control form-control-sm" (change)="dropDownChanged('Vari','U_O_INSPECTOR_CODE',dataItem,inspectorId.value)">
+                                        <option value=""></option>
+                                    <option *ngFor="let val of ListInspID" [value]="val.Name" [selected]="dataItem.U_O_INSPECTOR_ID===val.Name">
+                                      {{val.Name}}
+                                    </option>
+                                    </select>
+                                  </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_OBSERVATION" title="{{arrCaptions.var_title_Observation}}" [width]="160">
+                                <ng-template kendoGridCellTemplate let-dataItem>
+                                    <select class="form-control form-control-sm">
+                                        <option value=""></option>
+                                    <option *ngFor="let val of varObservationArr" [value]="val.value" [selected]="dataItem.variObservation===val.value">
+                                      {{val.value}}
+                                    </option>
+                                    </select>
+                                  </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column field="U_O_QC_RESULT" title="{{arrCaptions.cap_title_Result}}" [width]="160">
+                              <ng-template kendoGridCellTemplate let-dataItem>
+                                <select #qcResult class="form-control form-control-sm" (change)="dropDownChanged('Vari','U_O_QC_RESULT',dataItem,qcResult.value)">
+                                    <option value=""></option>
+                                <option *ngFor="let val of ListResult" [value]="val.value" [selected]="dataItem.variQCResult===val.value">
+                                  {{val.value}}
+                                </option>
+                                </select>
+                              </ng-template>
+                            </kendo-grid-column>
+                            <kendo-grid-column input="text" field="U_O_REMARKS" title="{{arrCaptions.cap_title_Remarks}}" [width]="160">
+                                <ng-template kendoGridCellTemplate let-dataItem>
+                                    <span  *ngIf="dataItem.isRemarkReqVari==true"  class="float-right opti_error-msg">{{arrCaptions.remarkreq}}</span>
+                                    <input #remarks type="text" [value]="this.dataItem.U_O_REMARKS" (blur)="remarksFilled('Vari',dataItem,remarks.value)">
+                                </ng-template>
+                            </kendo-grid-column>
+
                             
                             <!-- xlsx template start -->
                             <kendo-grid-excel fileName="sales-order-content.xlsx"></kendo-grid-excel>
                             <!-- xlsx template end -->
               
                           </kendo-grid>
-                        </ng-container>
-                        <!-- grid end -->
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-            
-                <div id="" *ngIf="tabName=='variable'" class="opti_tabcontent pb-0">
-                  <h4>Capture Variable Values</h4>
-                  <div class="w-100 position-relative" *ngIf="showGridLoader" style="min-height:150px">
-                    <!-- loader start -->
-                    <div class="opti_loader opti_loader-content-tab" >
-                        <div class="opti_spinner"></div>
-                    </div>
-                    <!-- loader end -->  
-                  </div>
-
-                  <div class="col-12">                      
-                    <div class="w-100" [perfectScrollbar]=" ">
-                      <!-- grid start -->
-                      <ng-container *ngIf="showGridLoader==false">
-                          <kendo-grid 
-                          [kendoGridBinding]="gridData" 
-                          [resizable]="false" 
-                          [pageSize]="50" 
-                          [pageable]="true" 
-                          [sortable]="true"  
-                          [filterable]=isColumnFilter
-                          [reorderable]="true"
-                          [groupable]=isColumnGroup 
-                          [columnMenu]="{ columnChooser: false }" 
-                          [height]=400 
-                          [selectable]="true" 
-                          #gridItem>
-                          <!-- [kendoGridBinding]="gridData | customPipeItem:searchRequest"  -->
-                          <!-- (selectionChange)="openInqueryDetailOnSelectInquery(gridItem, $event, true, gridItem)" -->
-            
-                          <!-- grid template start -->
-                          <ng-template kendoGridToolbarTemplate>
-            
-                              <!-- show hide column start show hide -->
-                              <kendo-grid-column-chooser class="float-left"></kendo-grid-column-chooser>
-            
-                              <!-- filter and grouping -->
-                              <form class="k-form opti_show-hide-grid-column-filter float-left">
-                                  <div class="k-form-field float-left">
-                                      <input #chkFilter type="checkbox" (change)="onFilterChange(chkFilter,gridItem)" id="opti_SalesOrderContentColumnFilterID" [(ngModel)]="isColumnFilter" class="k-checkbox" name="columnfilter" />
-                                      <label class="k-checkbox-label" for="opti_SalesOrderContentColumnFilterID">Enable Filter</label>
-                                  </div>
-            
-                                  <div class="k-form-field float-left">
-                                      <input type="checkbox" id="opti_SalesOrderContentColumnGroupID"  [(ngModel)]="isColumnGroup" class="k-checkbox" name="columnGroup" />
-                                      <label class="k-checkbox-label" for="opti_SalesOrderContentColumnGroupID">Enable Grouping</label>
-                                  </div>
-                              </form>
-            
-                              <!-- export -->
-                              <button type="button" kendoGridExcelCommand icon="file-excel" class="float-left opti_grid-toolbar-excelbutton">
-                                  <svg-icon src="{{imgPath}}/common/download.svg" [svgStyle]="{ 'width.px':16, 'height.px':16}"></svg-icon>
-                              </button>
-            
-                              <!-- common search -->
-                              <!-- <div class="float-right opti_right-top-sec-grid-purchase opti_right-top-sec-grid">
-                                  <form class="k-form opti_common-search-form float-left p-0">
-                                      <label class="k-form-field opti_common-search-label">
-                                          <input type="text" class="k-textbox" name="searchRequest" [(ngModel)]="searchRequest" />
-                                          <span class="opti_vertical-align opti_mouse-pointer"><img src="{{imgPath}}/common/search-black.svg" class="" alt="Search" width="15" /></span>
-                                      </label>
-                                  </form>
-                              </div> -->
-            
-                          </ng-template>
-            
-                          <kendo-grid-column field="ItemNumber" title="Item Number" [width]="160"></kendo-grid-column>
-                          <kendo-grid-column field="Quantity" title="Quantity" [width]="160"></kendo-grid-column>
-                          <kendo-grid-column field="UnitPrice" [width]="160" title="Unit Price"></kendo-grid-column>
-                          <kendo-grid-column field="DiscountPecent" [width]="160" title="Disc%" ></kendo-grid-column>
-                          <kendo-grid-column field="TaxCode" title="Tax Code" [width]="160"></kendo-grid-column>
-                          <kendo-grid-column field="TotalLC" title="Total (LC)" [width]="160"></kendo-grid-column>
-                          <kendo-grid-column field="UOMCode" title="UoM Code" [width]="160"></kendo-grid-column>
-                          <kendo-grid-column field="ShipTo" title="Ship To" [width]="160"></kendo-grid-column>
-                          <kendo-grid-column field="BillTo" [width]="160" title="Bill To"></kendo-grid-column>
-                          <kendo-grid-column field="ShippingType" [width]= "160" title="Shipping Type"></kendo-grid-column>
-                          <kendo-grid-column field="DeliveryDate" title="Delivery Date" [width]="160" filter="date"  type=date format="{0:dd MMM yy}"></kendo-grid-column>
-                          
-                          <!-- xlsx template start -->
-                          <kendo-grid-excel fileName="sales-order-content.xlsx"></kendo-grid-excel>
-                          <!-- xlsx template end -->
-            
-                        </kendo-grid>
                       </ng-container>
                       <!-- grid end -->
                     </div>
@@ -236,20 +339,20 @@
 
         </ng-container>
         <!-- content end -->
-
+     
         <div class="row mt-4 mb-5">  
           <div class="col-12">
-            <button kendoButton class="mr-1 k-button k-primary">Sample Info (1)</button>
-            <button kendoButton class="k-button k-primary">Save</button>
-            <button kendoButton class="k-button k-primary">Compute Result </button>
-            <button kendoButton class="k-button k-primary">Export</button>
+            <button kendoButton class="mr-1 k-button k-primary">{{arrCaptions.btn_sampleInfo}}</button>
+            <button kendoButton class="k-button k-primary" (click)="saveClick()">{{arrCaptions.btn_save}}</button>
+            <button kendoButton class="k-button k-primary" (click)="computeClick()">{{arrCaptions.btn_compute}} </button>
+            <button kendoButton class="k-button k-primary">{{arrCaptions.btn_export}}</button>
           </div>
           <div class="col-12 my-3">
             <input type="file">
           </div>
           <div class="col-12">
-            <button kendoButton class="mr-1 k-button k-primary">Collapse All</button>
-            <button kendoButton class="k-button k-primary">Expand All</button>
+            <button kendoButton class="mr-1 k-button k-primary">{{arrCaptions.btn_collapse}}</button>
+            <button kendoButton class="k-button k-primary">{{arrCaptions.btn_expand}}</button>
           </div>
         </div>
 
