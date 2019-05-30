@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
+import { ToastrModule } from 'ngx-toastr';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LandingComponent } from './common/landing/landing.component';
@@ -19,7 +19,8 @@ import {HttpClientModule} from '@angular/common/http';
     AppRoutingModule,
     BrowserAnimationsModule,
     PerfectScrollbarModule,
-    HttpClientModule
+    HttpClientModule,
+    ToastrModule.forRoot() 
   ],
   providers: [],
   bootstrap: [AppComponent]

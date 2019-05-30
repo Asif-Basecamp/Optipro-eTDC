@@ -16,8 +16,10 @@
             <kendo-combobox
               #docNo
               [data]="listItems"
+              [kendoDropDownFilter]="filterSettings"
               [textField]="'U_O_QCTEST_DOCNO'"
-              [valueField]="'U_O_QCTEST_DOCNO'">
+              [valueField]="'U_O_QCTEST_DOCNO'"
+              [placeholder]="'QC Order No.'">
               </kendo-combobox>
             <button kendoButton class="ml-2" (click)="showClick(docNo.value)">{{arrCaptions.Showdata_btn}}</button>
           </div>    
@@ -96,9 +98,12 @@
                                 </form>
               
                                 <!-- export -->
-                                <button type="button" kendoGridExcelCommand icon="file-excel" class="float-left opti_grid-toolbar-excelbutton">
+                                <div class="k-form-field float-left">
+                                <button type="button" kendoGridExcelCommand icon="file-excel" id="opti_SalesOrderContentColumnExport" class="float-left opti_grid-toolbar-excelbutton">
                                     <svg-icon src="{{imgPath}}/common/download.svg" [svgStyle]="{ 'width.px':16, 'height.px':16}"></svg-icon>
                                 </button>
+                                <label class="opti_form-label" for="opti_SalesOrderContentColumnExport">Export</label>
+                              </div>
                             </ng-template>
               
                             <kendo-grid-column  field="U_O_TEST_RLSEQ"  title="{{arrCaptions.cap_title_Sequence}}" [width]="160" >
@@ -146,7 +151,7 @@
                               <ng-template kendoGridCellTemplate let-dataItem>
                                 <select class="form-control  form-control-sm"  #inspValue (change)="dropDownChanged('Attr','U_O_INSPECTOR_CODE',dataItem,inspValue.value)">
                                     <option value=""></option>
-                                  <option *ngFor="let val of ListInspID" [value]="val.Name" [selected]="dataItem.U_O_INSPECTOR_CODE === val.Name"> {{val.Name}}</option>
+                                  <option *ngFor="let val of ListInspID" [value]="val.Name" [selected]="dataItem.U_O_INSPECTOR_CODE === val.Code"> {{val.Name}}</option>
                                 </select>
                               </ng-template>
                             </kendo-grid-column>
@@ -289,7 +294,7 @@
                                 <ng-template kendoGridCellTemplate let-dataItem>
                                     <select #inspectorId class="form-control form-control-sm" (change)="dropDownChanged('Vari','U_O_INSPECTOR_CODE',dataItem,inspectorId.value)">
                                         <option value=""></option>
-                                    <option *ngFor="let val of ListInspID" [value]="val.Name" [selected]="dataItem.U_O_INSPECTOR_ID===val.Name">
+                                    <option *ngFor="let val of ListInspID" [value]="val.Name" [selected]="dataItem.U_O_INSPECTOR_ID===val.Code">
                                       {{val.Name}}
                                     </option>
                                     </select>
@@ -342,18 +347,18 @@
      
         <div class="row mt-4 mb-5">  
           <div class="col-12">
-            <button kendoButton class="mr-1 k-button k-primary">{{arrCaptions.btn_sampleInfo}}</button>
+            <!-- <button kendoButton class="mr-1 k-button k-primary">{{arrCaptions.btn_sampleInfo}}</button> -->
             <button kendoButton class="k-button k-primary" (click)="saveClick()">{{arrCaptions.btn_save}}</button>
             <button kendoButton class="k-button k-primary" (click)="computeClick()">{{arrCaptions.btn_compute}} </button>
             <button kendoButton class="k-button k-primary">{{arrCaptions.btn_export}}</button>
           </div>
-          <div class="col-12 my-3">
+          <!-- <div class="col-12 my-3">
             <input type="file">
           </div>
           <div class="col-12">
             <button kendoButton class="mr-1 k-button k-primary">{{arrCaptions.btn_collapse}}</button>
             <button kendoButton class="k-button k-primary">{{arrCaptions.btn_expand}}</button>
-          </div>
+          </div> -->
         </div>
 
     </div>  

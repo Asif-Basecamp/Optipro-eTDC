@@ -41,6 +41,7 @@
     "ngx-bootstrap": "^3.0.0",
     "ngx-file-drop": "^4.0.6",
     "ngx-perfect-scrollbar": "^6.1.0",
+    "ngx-toastr": "^10.0.4",
     "rxjs": "^6.0.0",
     "rxjs-compat": "^6.0.0",
     "zone.js": "^0.8.26"

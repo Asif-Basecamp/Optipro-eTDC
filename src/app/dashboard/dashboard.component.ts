@@ -1,10 +1,12 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { UIHelper } from '../helpers/ui.helpers';
 import { GridComponent, StringFilterMenuComponent } from '@progress/kendo-angular-grid';
-import { salesOrderContent } from '../DemoData/sales-order';
+import { ToastrService } from 'ngx-toastr';
 import { GroupDescriptor, DataResult, process, GroupResult, groupBy } from '@progress/kendo-data-query';
 import { Configuration } from 'src/assets/configuration';
 import {QcdataService} from '../services/qcdata.service';
+import { NULL_EXPR } from '@angular/compiler/src/output/output_ast';
+import { DropDownFilterSettings } from '@progress/kendo-angular-dropdowns';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +18,7 @@ export class DashboardComponent implements OnInit {
 //common variables
 public ListToolGauge: any[]; 
   public ListInspID: any[];
-  public ListResult:any[] = [ {"value":"Pass"},{"value":"Fail"}];
+  public ListResult:any[]; // [ {"value":"Pass"},{"value":"Fail"}];
 
   //Variables for AttributeGrid
   public attrGridData: any[];
@@ -31,11 +33,7 @@ public variMesrdVal:string='';
 public variObsrvatn:string='';
 public variResult:string='';
 public varInspTyp:boolean = false;
-public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"Out of Range, Acceptable"},{"value":"Out of Range, Not Acceptable"}];
-
-//public varInpTypCol:any[]=[{"value":""},{"value":"Measurement"},{"value":"GoNoGo"}]
-
-
+public varObservationArr:any[];
   isMobile: boolean;
   isColumnFilter: boolean = false;
   isColumnGroup: boolean = false;
@@ -53,8 +51,9 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
   public listItems: GroupResult[];
   public ungroupedData: any[];
   qcDocNo:string = '';
-  arrCaptions:any[];
+  arrCaptions:any={};
   public load:boolean = false;
+  public docNum:string;
  
   // UI Section
   @HostListener('window:resize', ['$event'])
@@ -67,7 +66,7 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
   }
   // End UI Section
 
-  constructor(private qcservice: QcdataService ) { }
+  constructor(private qcservice: QcdataService,private toastr: ToastrService) { }
 
   ngOnInit() {
     this.showLoader = true;
@@ -84,6 +83,8 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
     this.isMobile = UIHelper.isMobile();
 
     this.arrCaptions = JSON.parse( window.localStorage.getItem("captions"));
+    this.ListResult =  [{"value":this.arrCaptions.arrResultPass},{"value":this.arrCaptions.arrResultFail}];
+this.varObservationArr = [{"value":this.arrCaptions.arrVarObsWithinAccept},{"value":this.arrCaptions.arrVarObsOutAccept},{"value":this.arrCaptions.arrVarObsOutNotAccept}];
     this.companyName = window.localStorage.getItem("companyName");
     this.userName = window.localStorage.getItem("userName");
     this.password = window.localStorage.getItem("password");
@@ -122,6 +123,11 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
     }
   }
 
+  public filterSettings: DropDownFilterSettings = {
+    caseSensitive: false,
+    operator: 'contains'
+};
+
   clearFilter(grid:GridComponent){      
     //grid.filter.filters=[];
   }
@@ -138,33 +144,33 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
 
   showClick(docNo:any){
     if(docNo != undefined){
+      this.docNum = docNo;
     this.showLoader = true;
     this.qcDocNo = docNo.U_O_QCTEST_DOCNO;
     this.qcservice.GetQCRecord(this.currentUrl,this.companyName,docNo.U_O_QCTEST_DOCNO).subscribe(
       data=>{
           this.qcOrderData = data as any[];
           //Attribute Data
-          this.attrGridData = this.qcOrderData.QCTestDataCollectionAttribute.filter(function(obj){
+          this.attrGridData = this.qcOrderData.QCTestDataCollectionAttribute.filter((obj)=>
+          {
             if(obj.U_O_QC_RESULT=="1"){
             obj.QCRESULT = "Pass";
             }else if(obj.U_O_QC_RESULT=="2"){
               obj.QCRESULT = "Fail";
             }
             obj.currentVal = '';
-            obj.isRemarkRequired = false;
+            obj.isRemarkReqAttr = false;
             obj.isForcefull = false;
             return obj;
           })
           this.showLoader = false;
-          this.attrListValue = this.qcOrderData.QCTestDataCollectionAttributeVal.filter(function(obj){
-              
-            return obj;
-          });
+          this.attrListValue = this.qcOrderData.QCTestDataCollectionAttributeVal;
           this.attrListAllowable = this.qcOrderData.GetAttrAllowedValueList;
           //Attribute Data
 
           //Variable Data
-          this.variGridData=this.qcOrderData.QCTestDataCollectionVariable.filter(function(obj){
+          this.variGridData=this.qcOrderData.QCTestDataCollectionVariable.filter((obj)=>
+          {
             obj.isRemarkReqVari=false;
             obj.isRemarkReqAttr=false;
             obj.isValueInvalidVari=false;
@@ -178,13 +184,13 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
               obj.variQCResult='';
             }
             if(obj.U_O_OBSERVATION=='1'){
-              obj.variObservation='Within Range, Acceptable';
+              obj.variObservation=this.arrCaptions.arrVarObsWithinAccept;
             }
             else if(obj.U_O_OBSERVATION=='2'){
-              obj.variObservation='Out of Range, Acceptable';
+              obj.variObservation=this.arrCaptions.arrVarObsOutAccept;
             }
             else if(obj.U_O_OBSERVATION=='3'){
-              obj.variObservation='Out of Range, Not Acceptable';
+              obj.variObservation=this.arrCaptions.arrVarObsOutNotAccept;
             }
             else{
               obj.variObservation='';
@@ -210,11 +216,7 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
   //Attribute Grid Code Starts
   attrGridValChange(attrValue:string,rowdata:any){
     this.attrGridData[rowdata.RowNumber-1].currentVal = attrValue;
-     let rs:any = this.attrListValue.filter(function (obj) {
-       if(obj.U_O_ATTRI_VAL==attrValue && obj.U_O_TEST_RLSEQ==rowdata.U_O_TEST_RLSEQ ){
-         return obj.U_O_QC_RESULT;
-       }
-     });
+    let rs:any = this.attrListValue.filter(obj=>obj.U_O_ATTRI_VAL==attrValue && obj.U_O_TEST_RLSEQ==rowdata.U_O_TEST_RLSEQ);
      if(rs.length!=0){
           if(rs[0].U_O_QC_RESULT=="1"){
             this.attrGridData[rowdata.RowNumber-1].U_O_ATTRI_MEAS_VAL = attrValue;
@@ -247,9 +249,10 @@ public varObservationArr:any[]=[{"value":"Within Range, Acceptable"},{"value":"O
   //Variable Grid Code Starts
 variGridValChange(rowData:any,varMeasrdVal:any){
   if (varMeasrdVal==""){
-    this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+    //this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
    }
   else{
+    this.variGridData[rowData.RowNumber-1].U_O_VARI_MEA_VAL=varMeasrdVal;
     if (this.varInspTyp){
       this.checkForGoNoGo(rowData)
     }
@@ -261,13 +264,13 @@ variGridValChange(rowData:any,varMeasrdVal:any){
 
 checkForMeasurment(rowData:any,varMeasrdVal:any){
 if ((varMeasrdVal==rowData.U_O_VARI_TARGET_VAL)||((varMeasrdVal>=rowData.U_O_VARI_LOWER_VAL)&&((rowData.U_O_VARI_UPPER_VAL>=varMeasrdVal)))){
-  this.variGridData[rowData.RowNumber-1].variObservation="Within Range, Acceptable";
+  this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutAccept;
   this.variGridData[rowData.RowNumber-1].variQCResult="Pass";
   this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=1;
   this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=1;
 }
 else{
-  this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Not Acceptable";
+  this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutNotAccept;
   this.variGridData[rowData.RowNumber-1].variQCResult="Fail";
   this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
   this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=2;
@@ -276,25 +279,103 @@ else{
 
 checkForGoNoGo(rowData:any){
   if ((rowData.U_O_GORESULT=="Pass")&&(rowData.U_O_NOGORESULT=="Pass")){
-    this.variGridData[rowData.RowNumber-1].variObservation="Within Range, Acceptable";
+    this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsWithinAccept;
     this.variGridData[rowData.RowNumber-1].variQCResult="Pass";
     this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=1;
     this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=1;
   }
   else if (((rowData.U_O_GORESULT=="Fail")&&(rowData.U_O_NOGORESULT=="Pass"))||((rowData.U_O_GORESULT=="Pass")&&(rowData.U_O_NOGORESULT=="Fail"))){
-    this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Not Acceptable";
+    this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutNotAccept;
     this.variGridData[rowData.RowNumber-1].variQCResult="Fail";
     this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=3;
     this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=2;
   }
   else if ((rowData.U_O_GORESULT=="Fail")&&(rowData.U_O_NOGORESULT=="Fail")){
-    this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Not Acceptable";
+    this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutNotAccept;
     this.variGridData[rowData.RowNumber-1].variQCResult="Fail";
     this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=3;
     this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=2;
   }
   if((rowData.U_O_GORESULT=="")&&(rowData.U_O_NOGORESULT=="")){
     this.variGridData[rowData.RowNumber-1].isValueInvalidVari=true;
+  }
+}
+
+resultChangeForGoNoGo(rowData:any,fieldValue:string){
+  if(rowData.U_O_REMARKS!="" && fieldValue=='Fail'){
+    this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutAccept;
+    this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
+    this.variGridData[rowData.RowNumber-1].variQCResult="Fail";
+    this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=2;
+  }
+  else if(rowData.U_O_REMARKS!="" && fieldValue=='Pass'){
+    this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutAccept;
+    this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
+    this.variGridData[rowData.RowNumber-1].variQCResult="Pass";
+    this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=1;
+  }
+  if((rowData.U_O_GORESULT=="Pass")&&(rowData.U_O_NOGORESULT=="Pass")&&(fieldValue=='Pass')){
+    this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+  }
+  else if((rowData.U_O_GORESULT=="Fail")&&(rowData.U_O_NOGORESULT=="Fail")&&(fieldValue=='Fail')){
+    this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+  }
+  if(((rowData.U_O_GORESULT=="Fail")&&(rowData.U_O_NOGORESULT=="Pass"))||((rowData.U_O_GORESULT=="Pass")&&(rowData.U_O_NOGORESULT=="Fail"))){
+    this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+  }
+  else{
+    this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
+  }
+  if ((rowData.U_O_GORESULT=="" || rowData.U_O_NOGORESULT=="")){
+    if((fieldValue=='Pass' || fieldValue=='Fail') && rowData.U_O_REMARKS==""){
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
+    }
+    else if ((fieldValue=='Pass' || fieldValue=='Fail') && rowData.U_O_REMARKS!=""){
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+    }
+  }
+}
+resultChangeForMeasurment(rowData:any,fieldValue:string){
+  if(rowData.U_O_REMARKS!="" && fieldValue=='Fail'){
+    this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutAccept;
+    this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
+    this.variGridData[rowData.RowNumber-1].variQCResult="Fail";
+    this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=2;
+  }
+  else if(rowData.U_O_REMARKS!="" && fieldValue=='Pass'){
+    this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutAccept;
+    this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
+    this.variGridData[rowData.RowNumber-1].variQCResult="Pass";
+    this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=1;
+  }
+
+  if (rowData.U_O_VARI_MEA_VAL!=""){
+    if(fieldValue=="Pass"){
+    if(rowData.U_O_VARI_MEA_VAL>=rowData.U_O_VARI_LOWER_VAL && rowData.U_O_VARI_UPPER_VAL>=rowData.U_O_VARI_MEA_VAL){
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+    }else{
+      if( this.variGridData[rowData.RowNumber-1].U_O_REMARKS == "")
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
+    }
+  }else if(fieldValue=="Fail"){
+    if(rowData.U_O_VARI_MEA_VAL<=rowData.U_O_VARI_LOWER_VAL && rowData.U_O_VARI_UPPER_VAL<=rowData.U_O_VARI_MEA_VAL){
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+    }else{
+      if( this.variGridData[rowData.RowNumber-1].U_O_REMARKS == "")
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
+    }
+  }
+  else{
+    if(rowData.U_O_VARI_MEA_VAL != "" || rowData.U_O_VARI_MEA_VAL != null){
+      if( this.variGridData[rowData.RowNumber-1].U_O_REMARKS == "")
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
+    }
+  }
+  }else{
+        if(fieldValue=="Pass" || fieldValue=="Fail"){
+          if( this.variGridData[rowData.RowNumber-1].U_O_REMARKS == "")
+          this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
+        }
   }
 }
 //Variable Grid Code Ends
@@ -304,49 +385,20 @@ dropDownChanged(grid:string,key:string,rowData:any,fieldValue:any){
   //Variable
   if(grid=="Vari"){
     if(key=="U_O_TG_ID_USED"){
-      this.variGridData[rowData.RowNumber-1].U_O_TG_CODE=fieldValue;
+      this.variGridData[rowData.RowNumber-1].U_O_TG_ID_USED=fieldValue;
     }
     if(key=="U_O_INSPECTOR_CODE"){
-      this.variGridData[rowData.RowNumber-1].U_O_INSPECTOR_ID=fieldValue;
+      let rs:any = this.ListInspID.filter(obj=>obj.Name==fieldValue);
+      if(rs.length>0){
+      this.variGridData[rowData.RowNumber-1].U_O_INSPECTOR_ID = rs[0].Code;
+      }
     }
     if(key=="U_O_QC_RESULT"){    
-        if(this.varInspTyp){
-        if(rowData.U_O_REMARKS!="" && fieldValue=='Fail'){
-          this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Acceptable";
-          this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
-          this.variGridData[rowData.RowNumber-1].variQCResult="Fail";
-          this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=2;
-          this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
-        }
-        else if(rowData.U_O_REMARKS!="" && fieldValue=='Pass'){
-          this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Acceptable";
-          this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
-          this.variGridData[rowData.RowNumber-1].variQCResult="Pass";
-          this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=1;
-          this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
-        }
-        else if((rowData.U_O_GORESULT=="Pass")&&(rowData.U_O_NOGORESULT=="Pass")&&(fieldValue=='Pass')){
-          this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
-        }
+      if(this.varInspTyp){
+          this.resultChangeForGoNoGo(rowData,fieldValue)
       }
       else{
-        if(rowData.U_O_REMARKS!="" && fieldValue=='Fail'){
-          this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Acceptable";1
-          this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
-          this.variGridData[rowData.RowNumber-1].variQCResult="Fail";
-          this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=2;
-          this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
-        }
-        else if(rowData.U_O_REMARKS!="" && fieldValue=='Pass'){
-          this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Acceptable";
-          this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2;
-          this.variGridData[rowData.RowNumber-1].variQCResult="Pass";
-          this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=1;
-          this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
-        }
-        else if (((rowData.U_O_VARI_MEA_VAL==rowData.U_O_VARI_TARGET_VAL)||((rowData.U_O_VARI_MEA_VAL>=rowData.U_O_VARI_LOWER_VAL)&&((rowData.U_O_VARI_UPPER_VAL>=rowData.U_O_VARI_MEA_VAL))))&&(fieldValue='Pass')){
-          this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
-        }
+        this.resultChangeForMeasurment(rowData,fieldValue)
       }    
     }
   }
@@ -357,7 +409,10 @@ dropDownChanged(grid:string,key:string,rowData:any,fieldValue:any){
       this.attrGridData[rowData.RowNumber-1].U_O_TG_CODE_USED = fieldValue;
     }
     if(key=="U_O_INSPECTOR_CODE"){
-      this.attrGridData[rowData.RowNumber-1].U_O_INSPECTOR_CODE = fieldValue;
+      let rs:any = this.ListInspID.filter(obj=>obj.Name==fieldValue);
+      if(rs.length>0){
+      this.attrGridData[rowData.RowNumber-1].U_O_INSPECTOR_CODE = rs[0].Code;
+      }
     }
     if(key=="U_O_QC_RESULT"){    
       let resVal:string;
@@ -382,14 +437,12 @@ dropDownChanged(grid:string,key:string,rowData:any,fieldValue:any){
 checkResult(rowData:any,resVal:string){
   let resCurrVal = rowData.currentVal;
   if(resCurrVal != ""){
-  let rs:any = this.attrListValue.filter(function (obj) {
-    if(obj.U_O_ATTRI_VAL == resCurrVal && obj.U_O_TEST_RLSEQ==rowData.U_O_TEST_RLSEQ ){
-      return obj.U_O_QC_RESULT;
-    }
-  });
+    let rs:any = this.attrListValue.filter(obj=>obj.U_O_ATTRI_VAL == resCurrVal && obj.U_O_TEST_RLSEQ==rowData.U_O_TEST_RLSEQ);
   if(rs[0].U_O_QC_RESULT!=resVal){ 
+    if( this.attrGridData[rowData.RowNumber-1].U_O_REMARKS == "" || this.attrGridData[rowData.RowNumber-1].U_O_REMARKS == null ){
       this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr = true;
       this.attrGridData[rowData.RowNumber-1].isForcefull = true;
+    }
   }else{
     this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr = false;
     this.attrGridData[rowData.RowNumber-1].isForcefull = false;
@@ -400,31 +453,44 @@ else{
   this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr = false;
   this.attrGridData[rowData.RowNumber-1].isForcefull = false;
  }else{
-  this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr = true;
-  this.attrGridData[rowData.RowNumber-1].isForcefull = true;
-  }
+  if( this.attrGridData[rowData.RowNumber-1].U_O_REMARKS == "" || this.attrGridData[rowData.RowNumber-1].U_O_REMARKS == null){
+        this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr = true;
+        this.attrGridData[rowData.RowNumber-1].isForcefull = true;
+      }
+    }
   }  
 }
 
 remarksFilled(grid:string,rowData:any,remarks:any){
-  if(remarks!= undefined || remarks!= ""){
+  if(remarks!= undefined && remarks!= null){
     if(grid=="Vari"){
-      if(remarks==""){
-        this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
-      }
-      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
-      this.variGridData[rowData.RowNumber-1].variObservation="Out of Range, Acceptable";
-      this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2; 
+        this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=2; 
       this.variGridData[rowData.RowNumber-1].U_O_REMARKS=remarks; 
+      this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutAccept;
+      if(this.variGridData[rowData.RowNumber-1].isRemarkReqVari == true && remarks!=""){
+        this.variGridData[rowData.RowNumber-1].isRemarkReqVari = false;
+      }
+      else if(remarks==""){
+        let resultValue = this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT;
+      if(this.varInspTyp){
+          this.resultChangeForGoNoGo(rowData,resultValue)
+      }
+      else{
+        this.resultChangeForMeasurment(rowData,resultValue)
+      }    
+      }
     }
     else if(grid=="Attr"){
         this.attrGridData[rowData.RowNumber-1].U_O_REMARKS = remarks;
         this.attrGridData[rowData.RowNumber-1].U_O_OBSERVATION = remarks;
-        if(this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr == true){
+        if(this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr == true && remarks!=""){
           this.attrGridData[rowData.RowNumber-1].isRemarkReqAttr = false;
           this.attrGridData[rowData.RowNumber-1].isForcefull = false;
         }
-    }
+        else if(remarks==""){
+          this.checkResult(rowData,this.attrGridData[rowData.RowNumber-1].U_O_QC_RESULT)
+        }
+      }
   }
 }
 //Common Code Ends
@@ -435,7 +501,18 @@ saveClick(){
     this.qcservice.SaveResult(this.currentUrl,this.attrGridData,this.variGridData,this.companyName,this.userName).subscribe(
       data=>{
         isSaved = data as boolean;
-    });
+          if(isSaved==true){
+            this.showMessage("success");
+            this.showClick(this.docNum);
+        }else{
+          this.showMessage("error");
+        }
+      },
+      error=>{
+        this.showMessage("error'");
+      });
+    }else{
+      this.showMessage("warning");
   }
 }
 
@@ -445,43 +522,70 @@ computeClick(){
         this.qcservice.ComputeResult(this.currentUrl,this.attrGridData,this.variGridData,this.companyName,this.userName).subscribe(
           data=>{
             isSaved = data as boolean;
+            if(isSaved==true){
+              this.showMessage("success");
+              this.showClick(this.docNum);
+            }else{
+              this.showMessage("error");
+          }
+        },
+        error=>{
+          this.showMessage("error");
         });
+      }
+      else{
+        this.showMessage("warning");
       }
   }
 
 
  validateGrid(source:String) {
- let save:boolean = true;
+    let save:boolean = true;
+      if(source=="save"){
+        
+        let arrAttr:any = this.attrGridData.filter((obj)=>obj.isRemarkReqAttr == true && (obj.U_O_REMARKS =="" || obj.U_O_REMARKS == null));
+        let arrVar:any = this.variGridData.filter((obj)=>obj.isRemarkReqVari == true && (obj.U_O_REMARKS =="" || obj.U_O_REMARKS == null));
+        
+        if(arrAttr.length>0 || arrVar.length>0){
+          save = false;
+        }
+      }
+      else if(source=="compute"){
+       
+        let arrAttr = this.attrGridData.filter(obj=>(obj.isRemarkReqAttr == true) || (obj.U_O_ATTRI_MEAS_VAL == "" && (obj.U_O_QC_RESULT == null || obj.U_O_QC_RESULT == "" || obj.U_O_QC_RESULT == undefined || (obj.U_O_REMARKS =="" || obj.U_O_REMARKS == null))));
 
- this.attrGridData.filter(function(obj){
-   if(obj.isRemarkReqAttr == true && obj.U_O_REMARKS ==""){
-    save = false;
-   }
- });
-//  if(source=="save"){
-//   for(var line=0; line<=this.attrGridData.length-1 ; line++){
-//     if(this.attrGridData[line].isRemarkReqAttr == true && this.attrGridData[line].U_O_REMARKS==""){
-//         this.attrGridData[line].isRemarkReqAttr = true;
-//         this.attrGridData[line].isForcefull = true;
-//         save = false;
-//        break;
-//       }
-//     }
-//   return save;
-//  }
-//  else if(source=="compute"){
-//   for(var line=0; line<=this.attrGridData.length-1 ; line++){
-//        if(this.attrGridData[line].isRemarkReqAttr == true && this.attrGridData[line].U_O_REMARKS=="" && this.attrGridData[line].U_O_QC_RESULT==""){
-//           this.attrGridData[line].isRemarkReqAttr = true;
-//           this.attrGridData[line].isForcefull = true;
-//           save = false;
-//         break;
-//         } 
-//     }
+        let arrVar = this.variGridData.filter(obj=>(obj.isRemarkReqVari == true) || (obj.U_O_VARI_MEA_VAL == "" && (obj.U_O_QC_RESULT == null || obj.U_O_QC_RESULT == "" || obj.U_O_QC_RESULT == undefined || (obj.U_O_REMARKS =="" || obj.U_O_REMARKS == null))));
+        
+        // let arrVar = this.variGridData.filter(obj=> (obj.U_O_QC_RESULT == null || obj.U_O_QC_RESULT == undefined || obj.U_O_QC_RESULT == "" || (obj.U_O_REMARKS =="" ||obj.U_O_REMARKS ==null)) || (this.variGridData.isRemarkReqVari==true))
+        
+        if(arrAttr.length>0 || arrVar.length>0){
+          save = false;
+        }
+      }
+    return save;
+  }
 
-//  }
-return save;
-}
-
+  showMessage(type:string){
+    switch(type){
+      case("error"):{
+        this.toastr.error(this.arrCaptions.err_fail_cap,this.arrCaptions.err_fail, {
+          timeOut: 3000
+        });
+        break;
+      }
+      case("warning"):{
+        this.toastr.warning(this.arrCaptions.err_warning_cap,this.arrCaptions.err_fail, {
+          timeOut: 3000
+        });
+        break;
+      }
+      case("success"):{
+        this.toastr.success(this.arrCaptions.err_success_cap,this.arrCaptions.err_success, {
+          timeOut: 3000
+        });
+        break;
+      }
+    }
+  }
 }
 

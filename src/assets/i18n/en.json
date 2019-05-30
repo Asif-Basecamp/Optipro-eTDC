@@ -38,9 +38,19 @@
     "btn_export":"Export",
     "btn_collapse":"Collapse All",
     "btn_expand":"Expand All",
+    "arrResultPass":"Pass",
+    "arrResultFail":"Fail",
+    "arrVarObsWithinAccept":"Within Range, Acceptable",
+    "arrVarObsOutAccept":"Out of Range, Acceptable",
+    "arrVarObsOutNotAccept":"Out of Range, Not Acceptable",
     "username_req":"Username is required.",
     "password_req":"Password is required.",
     "invalidcredentials":"Invalid credentials.",
     "var_error_valueInvalid":"Value is invalid.",
-    "remarkreq":"Remark is required"
+    "remarkreq":"Remark is required",
+    "err_fail":"Failed",
+    "err_fail_cap":"Unable to save record",
+    "err_warning_cap":"Please validate grid data",
+    "err_success":"Success",
+    "err_success_cap":"Record saved sucessfully"
 }
