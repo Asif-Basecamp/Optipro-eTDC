@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UIHelper } from '../../helpers/ui.helpers';
 import { Commonservice } from '../../services/commonservice.service';
 import { Router } from '@angular/router';
@@ -21,7 +21,7 @@ export class PortalTopComponent implements OnInit {
 
   cmpName:string;
 
-  arrCaptions:any[];
+  arrCaptions:any={};
  
   ngOnInit() {
     

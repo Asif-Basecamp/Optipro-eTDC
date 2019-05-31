@@ -6,7 +6,7 @@ const routes: Routes = [
 
   { path: '', redirectTo:'account',pathMatch: 'full'},
   { path: 'account', loadChildren: "./account/account.module#AccountModule" },
-  // { path:'landing',component:LandingComponent}, 
+  //  { path:'**', redirectTo:'account',pathMatch: 'full'}, 
   { path: 'home', loadChildren: "./portal-home/portal-home.module#PortalHomeModule" }
 ];
 

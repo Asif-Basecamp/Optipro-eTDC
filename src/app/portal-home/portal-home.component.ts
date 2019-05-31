@@ -1,7 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { UIHelper } from '../helpers/ui.helpers';
-import { Commonservice } from '../services/commonservice.service';
-import { CurrentSidebarInfo } from '../models/sidebar/current-sidebar-info';
+import { Component, OnInit,  } from '@angular/core';
 
 @Component({
   selector: 'app-portal-home',
@@ -10,10 +7,10 @@ import { CurrentSidebarInfo } from '../models/sidebar/current-sidebar-info';
 })
 export class PortalHomeComponent implements OnInit {
 
-  isMobile:boolean;
-  localRightSectionContainer:boolean;
-  currentSidebarInfo:CurrentSidebarInfo=null;
-  constructor(private service: Commonservice){ }  
+  // isMobile:boolean;
+  // localRightSectionContainer:boolean;
+  // currentSidebarInfo:CurrentSidebarInfo=null;
+  constructor(){ }  
   ngOnInit(){  
 
     // Remove account related class from body
@@ -21,26 +18,26 @@ export class PortalHomeComponent implements OnInit {
     element.className = "";
 
     //this.localRightSectionContainer = this.globals.localRightSectionContainer;
-    this.service.currentSidebarInfo.subscribe(
-      data=> {
-        if(data!=null){
-          this.currentSidebarInfo=data;          
-          this.localRightSectionContainer=data.SideBarStatus
-        }
-      }
-    );
+    // this.service.currentSidebarInfo.subscribe(
+    //   data=> {
+    //     if(data!=null){
+    //       this.currentSidebarInfo=data;          
+    //       this.localRightSectionContainer=data.SideBarStatus
+    //     }
+    //   }
+    // );
     
 
     // UI operations
-    this.isMobile =UIHelper.isMobile();
+    // this.isMobile =UIHelper.isMobile();
     // UIHelper.manageNavigationPanel();
   }
   
-  @HostListener('window:resize', ['$event'])
-  onResize(event) { 
-    // UI operations   
-    this.isMobile =UIHelper.isMobile();
-    // UIHelper.manageNavigationPanel();
-  }
+  // @HostListener('window:resize', ['$event'])
+  // onResize(event) { 
+  //   // UI operations   
+  //   this.isMobile =UIHelper.isMobile();
+  //   // UIHelper.manageNavigationPanel();
+  // }
 
 }

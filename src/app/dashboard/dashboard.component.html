@@ -124,9 +124,11 @@
                               <ng-template kendoGridCellTemplate let-dataItem>
                                 <select class="form-control  form-control-sm" #attrValue (change)="attrGridValChange(attrValue.value,dataItem)">
                                   <option value=""></option>
+                                  <option *ngFor="let val of dataItem.values" [value]="val"  [selected]="dataItem.U_O_ATTRI_MEAS_VAL === val"> {{val}}</option>
+                                  <!-- <option value=""></option>
                                   <ng-container *ngFor="let val of attrListValue">
                                   <option  *ngIf="val.U_O_TEST_RLSEQ === dataItem.U_O_TEST_RLSEQ" [value]="val.U_O_ATTRI_VAL"  [selected]="dataItem.U_O_ATTRI_MEAS_VAL === val.U_O_ATTRI_VAL">{{val.U_O_ATTRI_VAL}}</option>
-                                  </ng-container>
+                                  </ng-container> -->
                                 </select>
                               </ng-template>
                             </kendo-grid-column>

@@ -161,6 +161,7 @@ this.varObservationArr = [{"value":this.arrCaptions.arrVarObsWithinAccept},{"val
             obj.currentVal = '';
             obj.isRemarkReqAttr = false;
             obj.isForcefull = false;
+            obj.values = obj.U_O_ATTRI_VAL.split(";");
             return obj;
           })
           this.showLoader = false;
@@ -264,7 +265,7 @@ variGridValChange(rowData:any,varMeasrdVal:any){
 
 checkForMeasurment(rowData:any,varMeasrdVal:any){
 if ((varMeasrdVal==rowData.U_O_VARI_TARGET_VAL)||((varMeasrdVal>=rowData.U_O_VARI_LOWER_VAL)&&((rowData.U_O_VARI_UPPER_VAL>=varMeasrdVal)))){
-  this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsOutAccept;
+  this.variGridData[rowData.RowNumber-1].variObservation=this.arrCaptions.arrVarObsWithinAccept;
   this.variGridData[rowData.RowNumber-1].variQCResult="Pass";
   this.variGridData[rowData.RowNumber-1].U_O_OBSERVATION=1;
   this.variGridData[rowData.RowNumber-1].U_O_QC_RESULT=1;
@@ -358,11 +359,11 @@ resultChangeForMeasurment(rowData:any,fieldValue:string){
       this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
     }
   }else if(fieldValue=="Fail"){
-    if(rowData.U_O_VARI_MEA_VAL<=rowData.U_O_VARI_LOWER_VAL && rowData.U_O_VARI_UPPER_VAL<=rowData.U_O_VARI_MEA_VAL){
-      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
+    if(rowData.U_O_VARI_MEA_VAL>=rowData.U_O_VARI_LOWER_VAL && rowData.U_O_VARI_UPPER_VAL>=rowData.U_O_VARI_MEA_VAL){
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
     }else{
       if( this.variGridData[rowData.RowNumber-1].U_O_REMARKS == "")
-      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=true;
+      this.variGridData[rowData.RowNumber-1].isRemarkReqVari=false;
     }
   }
   else{
@@ -498,6 +499,10 @@ remarksFilled(grid:string,rowData:any,remarks:any){
 saveClick(){
   let isSaved:boolean;
   if(this.validateGrid('save')){
+    this.attrGridData = this.attrGridData.filter(function(obj){
+      delete obj.values;
+      return obj;
+    });
     this.qcservice.SaveResult(this.currentUrl,this.attrGridData,this.variGridData,this.companyName,this.userName).subscribe(
       data=>{
         isSaved = data as boolean;
@@ -506,10 +511,12 @@ saveClick(){
             this.showClick(this.docNum);
         }else{
           this.showMessage("error");
+          this.showClick(this.docNum);
         }
       },
       error=>{
         this.showMessage("error'");
+        this.showClick(this.docNum);
       });
     }else{
       this.showMessage("warning");
@@ -519,18 +526,24 @@ saveClick(){
 computeClick(){
   let isSaved:boolean;
   if(this.validateGrid('compute')){
+    this.attrGridData = this.attrGridData.filter(function(obj){
+      delete obj.values;
+      return obj;
+    });
         this.qcservice.ComputeResult(this.currentUrl,this.attrGridData,this.variGridData,this.companyName,this.userName).subscribe(
           data=>{
             isSaved = data as boolean;
             if(isSaved==true){
-              this.showMessage("success");
+              this.showMessage("comupte_success");
               this.showClick(this.docNum);
             }else{
-              this.showMessage("error");
+              this.showMessage("comupte_fail");
+              this.showClick(this.docNum);
           }
         },
         error=>{
-          this.showMessage("error");
+          this.showMessage("comupte_fail");
+          this.showClick(this.docNum);
         });
       }
       else{
@@ -581,6 +594,18 @@ computeClick(){
       }
       case("success"):{
         this.toastr.success(this.arrCaptions.err_success_cap,this.arrCaptions.err_success, {
+          timeOut: 3000
+        });
+        break;
+      }
+      case("comupte_success"):{
+        this.toastr.success(this.arrCaptions.err_success_compute_cap,this.arrCaptions.err_success, {
+          timeOut: 3000
+        });
+        break;
+      }
+      case("comupte_fail"):{
+        this.toastr.success(this.arrCaptions.err_fail_compute_cap,this.arrCaptions.err_fail, {
           timeOut: 3000
         });
         break;

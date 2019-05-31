@@ -50,7 +50,9 @@
     "remarkreq":"Remark is required",
     "err_fail":"Failed",
     "err_fail_cap":"Unable to save record",
+    "err_fail_compute_cap":"Unable to save record",
     "err_warning_cap":"Please validate grid data",
     "err_success":"Success",
-    "err_success_cap":"Record saved sucessfully"
+    "err_success_cap":"Record saved sucessfully",
+    "err_success_compute_cap":"Record computed sucessfully"
 }

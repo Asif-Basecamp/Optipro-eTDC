@@ -132,7 +132,7 @@ public onPasswordBlur(username:string,password:string){
       this._accountService.login(username,password,this.adminURL).subscribe(
         data => {
           if(data!= null && data.Table.length > 0 ){
-              this.listItems = data.Table.filter(a=>a.OPTM_OPTIADDON=="MMO");
+              this.listItems = data.Table.filter(a=>a.OPTM_OPTIADDON=="QCDC");
               this.selectedValue = this.listItems[0];
               this.isError = false;
               this.showLoader = false;
