@@ -126,13 +126,18 @@ public getCookie(cname) {
 
 public onPasswordBlur(username:string,password:string){
   if(this.adminURL != ""){
+    let qcdcstr = "QCDC";
    this.showLoader = true;
    this.listItems = null;
    this.selectedValue = null;
       this._accountService.login(username,password,this.adminURL).subscribe(
         data => {
           if(data!= null && data.Table.length > 0 ){
-              this.listItems = data.Table.filter(a=>a.OPTM_OPTIADDON=="QCDC");
+            // this.listItems = data.Table.filter(function(obj){
+            //   if(obj.OPTM_OPTIADDON.indexOf('QCDC') !== -1){ return obj; }
+            // });
+            
+              this.listItems = data.Table.filter(a=>a.OPTM_OPTIADDON.indexOf('QCDC') !== -1);
               this.selectedValue = this.listItems[0];
               this.isError = false;
               this.showLoader = false;
